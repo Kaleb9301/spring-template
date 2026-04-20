@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.bankofabyssinia.spring_template.dto.Response.ApiResponse;
 
@@ -116,6 +117,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleNoHandlerFound(
         NoHandlerFoundException ex,
+        HttpServletRequest request
+    ) {
+    return errorResponse(HttpStatus.NOT_FOUND, "Resource not found", request, null);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleNoResourceFound(
+        NoResourceFoundException ex,
         HttpServletRequest request
     ) {
     return errorResponse(HttpStatus.NOT_FOUND, "Resource not found", request, null);

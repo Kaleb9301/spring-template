@@ -42,8 +42,7 @@ public class SecurityConfig {
                     auth.requestMatchers(
                             "/auth/**",
                             "/public/**",
-                            "/actuator/health/**",
-                            "/actuator/info",
+                            "/actuator/**",
                             "/error")
                         .permitAll();
 

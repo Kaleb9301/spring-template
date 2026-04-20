@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080/api
 @username = admin
-@password = change_me
+@password = 123456
 @basicToken = YWRtaW46Y2hhbmdlX21l
 @correlationId = test-correlation-123
 
@@ -34,3 +34,14 @@ Accept: application/json
 # In production profile, app.swagger.enabled is false by default.
 GET {{baseUrl}}/v3/api-docs
 Accept: application/json
+
+### 8) External LDAP login (auth-service)
+POST http://boainhousesys.bankofabyssinia.com:8085/auth-service/api/auth/ldap-login
+Content-Type: application/json
+Accept: application/json
+
+{
+	"username": "your.username",
+	"password": "your_password",
+	"applicationId": 0
+}
