@@ -96,10 +96,29 @@ jobs:
           set -euo pipefail
 
           api="https://api.github.com"
+          if [[ -z "${TOKEN:-}" ]]; then
+            echo "REPO_TOKEN secret is missing or empty."
+            echo "Add a Personal Access Token as REPO_TOKEN."
+            exit 1
+          fi
+
+          # Validate token before attempting repo creation.
+          auth_check_code="$(curl -sS -o /tmp/auth-check.json -w '%{http_code}' \
+            -H "Authorization: token ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${api}/user")"
+
+          if [[ "${auth_check_code}" != "200" ]]; then
+            echo "Token validation failed (HTTP ${auth_check_code})."
+            cat /tmp/auth-check.json || true
+            echo "Use a valid PAT in REPO_TOKEN (classic PAT recommended with 'repo' and 'workflow' scopes)."
+            exit 1
+          fi
+
           payload="{\"name\":\"${REPO}\",\"private\":$( [ "${VIS}" = "private" ] && echo true || echo false )}"
 
           resp="$(curl -sS -w '\n%{http_code}' -X POST \
-            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Authorization: token ${TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "${api}/user/repos" \
             -d "${payload}")"
@@ -111,6 +130,10 @@ jobs:
           echo "${body}"
 
           if [[ "${code}" != "201" ]]; then
+            if [[ "${code}" == "401" ]]; then
+              echo "Bad credentials: REPO_TOKEN is invalid/expired or lacks required permissions."
+              echo "Use a PAT with repo creation permission (classic PAT with 'repo' scope is recommended)."
+            fi
             echo "Repository creation failed"
             exit 1
           fi
