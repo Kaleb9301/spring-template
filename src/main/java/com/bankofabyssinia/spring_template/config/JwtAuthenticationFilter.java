@@ -84,10 +84,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/error",
 
             // Auth endpoints
-            "/api/auth/**",
-            "/auth-service/api/auth/**",
-           "/auth/**",
-            "/api/public/**",
+            // "/api/auth/**",
+            "/public/ping",
+            // "/auth-service/api/auth/**",
+            "/auth/**",
+            // "/api/public/**",
             "/api/orale/employeesListByUUID/**"
     );
 
