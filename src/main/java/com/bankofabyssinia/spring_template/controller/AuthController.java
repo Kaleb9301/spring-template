@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bankofabyssinia.spring_template.dto.Request.LdapLoginRequest;
-
+import com.bankofabyssinia.spring_template.dto.Request.LogOutDto;
 import com.bankofabyssinia.spring_template.dto.Request.RefreshTokenRequest;
 import com.bankofabyssinia.spring_template.dto.Response.ApiResponse;
 import com.bankofabyssinia.spring_template.dto.Response.LdapLoginResponse;
+import com.bankofabyssinia.spring_template.dto.Response.LogOutResponse;
 import com.bankofabyssinia.spring_template.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,5 +39,14 @@ public class AuthController extends BaseController {
     public ResponseEntity<ApiResponse<LdapLoginResponse>> ldapRefresh(@Valid @RequestBody RefreshTokenRequest request) {
         return ok("Token refreshed successfully", authService.ldapRefresh(request));
     }
+
+    @Operation(summary = "LDAP refresh", description = "Refreshes the LDAP token by delegating to auth-service")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody LogOutDto request) {
+        LogOutResponse response = authService.logout(request);
+        return ok(response.getMessage());
+    }
+
+    
 
 }

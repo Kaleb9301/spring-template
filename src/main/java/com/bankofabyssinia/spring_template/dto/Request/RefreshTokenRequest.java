@@ -1,9 +1,11 @@
 package com.bankofabyssinia.spring_template.dto.Request;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
-public class RefreshTokenRequest {
-    @NotBlank
+@Data
+public class RefreshTokenRequest implements BaseRequest {
+    @NotBlank(message = "refreshToken is required")
     private String refreshToken;
 
     public RefreshTokenRequest() {
