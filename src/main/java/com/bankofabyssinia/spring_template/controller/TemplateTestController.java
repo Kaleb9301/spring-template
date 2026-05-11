@@ -11,17 +11,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bankofabyssinia.spring_template.dto.Response.ApiResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @Profile("!prod")
 @RequestMapping("/public")
 public class TemplateTestController extends BaseController {
 
     @GetMapping("/ping")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> ping() {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> ping(HttpServletRequest request) {
         Map<String, Object> payload = Map.of(
                 "status", "UP",
                 "service", "spring-template",
                 "timestamp", LocalDateTime.now().toString());
-        return ok("Template API is reachable", payload);
+        return ok("Template API is reachable", payload, request.getRequestURI());
     }
 }

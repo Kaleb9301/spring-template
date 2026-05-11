@@ -17,6 +17,7 @@ import com.bankofabyssinia.spring_template.dto.Response.LogOutResponse;
 import com.bankofabyssinia.spring_template.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -30,21 +31,21 @@ public class AuthController extends BaseController {
    
     @Operation(summary = "LDAP login", description = "Delegates login to external auth-service LDAP endpoint")
     @PostMapping("/ldap-login")
-    public ResponseEntity<ApiResponse<LdapLoginResponse>> ldapLogin(@Valid @RequestBody LdapLoginRequest request) {
-        return ok("Login successful", authService.ldapLogin(request));
+    public ResponseEntity<ApiResponse<LdapLoginResponse>> ldapLogin(@Valid @RequestBody LdapLoginRequest request, HttpServletRequest httpServletRequest) {
+        return ok("Login successful", authService.ldapLogin(request), httpServletRequest.getRequestURI());
     }
 
     @Operation(summary = "LDAP refresh", description = "Refreshes the LDAP token by delegating to auth-service")
     @PostMapping("/ldap-refresh")
-    public ResponseEntity<ApiResponse<LdapLoginResponse>> ldapRefresh(@Valid @RequestBody RefreshTokenRequest request) {
-        return ok("Token refreshed successfully", authService.ldapRefresh(request));
+    public ResponseEntity<ApiResponse<LdapLoginResponse>> ldapRefresh(@Valid @RequestBody RefreshTokenRequest request, HttpServletRequest httpServletRequest) {
+        return ok("Token refreshed successfully", authService.ldapRefresh(request), httpServletRequest.getRequestURI());
     }
 
     @Operation(summary = "LDAP refresh", description = "Refreshes the LDAP token by delegating to auth-service")
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody LogOutDto request) {
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody LogOutDto request, HttpServletRequest httpServletRequest) {
         LogOutResponse response = authService.logout(request);
-        return ok(response.getMessage());
+        return ok(response.getMessage(), httpServletRequest.getRequestURI());
     }
 
     

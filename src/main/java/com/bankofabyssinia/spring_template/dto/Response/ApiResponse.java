@@ -12,6 +12,7 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private String timeStamp;
+    private String path;
     private T data;
     
 }
