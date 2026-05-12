@@ -15,9 +15,11 @@ import com.bankofabyssinia.spring_template.dto.Request.LogOutDto;
 import com.bankofabyssinia.spring_template.dto.Request.RefreshTokenRequest;
 import com.bankofabyssinia.spring_template.dto.Response.LdapLoginResponse;
 import com.bankofabyssinia.spring_template.dto.Response.LogOutResponse;
+import com.bankofabyssinia.spring_template.dto.Response.TokenValidationResponse;
 import com.bankofabyssinia.spring_template.exception.ExternalServiceException;
 import com.bankofabyssinia.spring_template.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -37,6 +39,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Value("${app.auth.ldap.url:}/logout")
     private String logoutUrl;
+
+    @Value("${app.auth.ldap.url:}/validate-token")
+    private String validateTokenUrl;
 
     public AuthServiceImpl(
             @Value("${app.auth.ldap.connect-timeout-ms:5000}") int connectTimeoutMs,
@@ -124,7 +129,7 @@ public class AuthServiceImpl implements AuthService {
         if (!ldapEnabled) {
             throw new IllegalStateException("Authentication integration is disabled");
         }
-        if (!StringUtils.hasText(ldapRefreshUrl)) {
+        if (!StringUtils.hasText(logoutUrl)) {
             throw new IllegalStateException("app.auth.ldap.url is not configured");
         }
 
@@ -147,6 +152,49 @@ public class AuthServiceImpl implements AuthService {
                 status = HttpStatus.BAD_GATEWAY;
             }
             throw new ExternalServiceException("Logout  failed with status: " + raw, status, ex);
+        } catch (RestClientException ex) {
+            throw new ExternalServiceException("Unable to reach authentication service", HttpStatus.SERVICE_UNAVAILABLE, ex);
+        }
+    }
+
+
+    @Override
+    public TokenValidationResponse validateToken(HttpServletRequest httpServletRequest) {
+        // Implement logout logic if needed, or delegate to auth-service if it has a logout endpoint
+        log.info("Authentication service enabled: {}", ldapEnabled);
+        log.info("Validate Token URL: {}", validateTokenUrl);
+        if (!ldapEnabled) {
+            throw new IllegalStateException("Authentication integration is disabled");
+        }
+        if (!StringUtils.hasText(validateTokenUrl)) {
+            throw new IllegalStateException("app.auth.ldap.url is not configured");
+        }
+
+        String authorizationHeader = httpServletRequest.getHeader("Authorization");
+        log.info("Validating token with auth-service. Authorization header present: {}", StringUtils.hasText(authorizationHeader));
+
+        if (!StringUtils.hasText(authorizationHeader)) {
+            throw new IllegalArgumentException("Authorization header is required");
+        }
+
+        try {
+            TokenValidationResponse response = restClient.get()
+                    .uri(validateTokenUrl)
+                    .header("Authorization", authorizationHeader)
+                    .retrieve()
+                    .body(TokenValidationResponse.class);
+
+            if (response == null) {
+                throw new IllegalStateException("LDAP service returned empty response");
+            }
+            return response;
+        } catch (RestClientResponseException ex) {
+            int raw = ex.getStatusCode() != null ? ex.getStatusCode().value() : -1;
+            HttpStatus status = HttpStatus.resolve(raw);
+            if (status == null) {
+                status = HttpStatus.BAD_GATEWAY;
+            }
+            throw new ExternalServiceException("Token Validation failed with status: " + raw, status, ex);
         } catch (RestClientException ex) {
             throw new ExternalServiceException("Unable to reach authentication service", HttpStatus.SERVICE_UNAVAILABLE, ex);
         }
